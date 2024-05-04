@@ -37,6 +37,8 @@ function App() {
 
   const [mqttClient, setMqttClient] = useState<mqtt.MqttClient>();
 
+  const [serialSend, setSerialSend] = useState<string>();
+
   useEffect(() => {
     const x = document.getElementById("terminal");
     if (x) {
@@ -199,6 +201,14 @@ function App() {
     mqttClient.publish(mqttPublish.topic, mqttPublish.message);
   };
 
+  const handleSendSerial = () => {
+    if (!transport) return;
+    const enc = new TextEncoder();
+    const encodedMessage = enc.encode(serialSend + "\n");
+
+    transport.write(encodedMessage);
+  };
+
   return (
     <>
       <header className="my-5">
@@ -245,25 +255,45 @@ function App() {
           <div id="terminal" className="block mt-4 shadow-xl"></div>
 
           <div className="mt-4 flex flex-row gap-4">
-            <button
-              className="basis-1/4 h-full grow bg-[#eeeeee] hover:bg-[#dddddd] border-solid border border-[#dddddd] rounded-md text-black px-4 py-3 drop-shadow-lg"
-              onClick={handleTerminalConnect}
-              // disabled={true}
-            >
-              Console Connect
-            </button>
-            <button
-              onClick={handleTerminalDisconnect}
-              className="basis-1/4 h-full bg-[#eeeeee] hover:bg-[#dddddd] border-solid border border-[#dddddd] rounded-md text-black px-4 py-3 drop-shadow-lg"
-            >
-              Console Disconnect
-            </button>
-            <button
-              onClick={handleHardReset}
-              className="basis-1/4 h-full bg-[#eeeeee] hover:bg-[#dddddd] border-solid border border-[#dddddd] rounded-md text-black px-4 py-3 drop-shadow-lg"
-            >
-              Hard Reset
-            </button>
+            <div className="basis-3/4">
+              <button
+                className="bg-[#eeeeee] hover:bg-[#dddddd] border-solid border border-[#dddddd] rounded-md text-black px-4 py-3 drop-shadow-lg"
+                onClick={handleTerminalConnect}
+                // disabled={true}
+              >
+                Console Connect
+              </button>
+              <button
+                onClick={handleTerminalDisconnect}
+                className="ms-2 bg-[#eeeeee] hover:bg-[#dddddd] border-solid border border-[#dddddd] rounded-md text-black px-4 py-3 drop-shadow-lg"
+              >
+                Console Disconnect
+              </button>
+              <button
+                onClick={handleHardReset}
+                className="ms-2 bg-[#eeeeee] hover:bg-[#dddddd] border-solid border border-[#dddddd] rounded-md text-black px-4 py-3 drop-shadow-lg"
+              >
+                Hard Reset
+              </button>
+
+              <div className="mt-3 block p-4 border-solid border border-[#627254] rounded-lg">
+                <label className="block text-white ms-1 mb-1 font-medium">
+                  Send Message to Device : (ended by /r/n)
+                </label>
+                <textarea
+                  className="rounded px-2 py-1 text-sm w-full"
+                  rows={3}
+                  value={serialSend}
+                  onChange={(e) => setSerialSend(e.target.value)}
+                />
+                <button
+                  onClick={handleSendSerial}
+                  className="block ms-auto mt-3 bg-[#eeeeee] hover:bg-[#dddddd] border-solid border border-[#dddddd] rounded-md text-black px-4 py-1 drop-shadow-lg text-sm"
+                >
+                  Send via Serial
+                </button>
+              </div>
+            </div>
             <div className="basis-1/2 p-4 border-solid border border-[#627254] rounded-lg">
               <h4 className="text-center text-white font-semibold text-lg">
                 Firmware Flash Tool
